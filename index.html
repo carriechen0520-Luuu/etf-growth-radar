@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETF 营销雷达 v2.0 · 雪球商业化销售决策助手</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --bg-soft: #0f1117;
+    --bg-card: #131620;
+    --bg-elevated: #1a1d2a;
+    --line: rgba(255,255,255,0.06);
+    --line-strong: rgba(255,255,255,0.12);
+    --text: #e8e9ee;
+    --text-dim: #9ca0ae;
+    --text-soft: #6b7080;
+    --accent: #5eead4;
+    --accent-dim: #2dd4bf;
+    --xq-blue: #4591ff;
+    --gold: #d4a574;
+    --danger: #f97066;
+    --engine-a: #eab308;
+    --engine-b: #22d3ee;
+    --engine-c: #c084fc;
+    --glow: rgba(94, 234, 212, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Manrope', 'Noto Serif SC', -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: overlay;
+  }
+
+  /* Background aurora */
+  .aurora {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .aurora::before, .aurora::after {
+    content: '';
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.12;
+  }
+  .aurora::before {
+    background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
+    top: -200px;
+    left: -200px;
+    animation: float1 20s ease-in-out infinite;
+  }
+  .aurora::after {
+    background: radial-gradient(circle, var(--xq-blue) 0%, transparent 60%);
+    bottom: -200px;
+    right: -200px;
+    animation: float2 25s ease-in-out infinite;
+  }
+  @keyframes float1 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(100px, 100px); }
+  }
+  @keyframes float2 {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-100px, -100px); }
+  }
+
+  /* Top nav */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(10, 11, 15, 0.7);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  nav .brand-mark {
+    width: 24px;
+    height: 24px;
+    border: 1.5px solid var(--accent);
+    position: relative;
+    transform: rotate(45deg);
+  }
+  nav .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: var(--accent);
+    opacity: 0.3;
+  }
+  nav .brand span:last-child {
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+  nav .meta {
+    display: flex;
+    gap: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  nav .meta .live::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-right: 6px;
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  main {
+    position: relative;
+    z-index: 2;
+    padding-top: 80px;
+  }
+
+  section {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 80px 40px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 120px 40px 80px;
+    position: relative;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 80px;
+    align-items: end;
+  }
+  .hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 8px 14px;
+    border: 1px solid rgba(94, 234, 212, 0.3);
+    border-radius: 100px;
+    background: rgba(94, 234, 212, 0.04);
+    margin-bottom: 40px;
+  }
+  .hero-label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  h1 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+  }
+  h1 .italic {
+    font-style: italic;
+    font-weight: 300;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--xq-blue) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  h1 .highlight {
+    color: var(--accent);
+  }
+
+  .hero-lead {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--text-dim);
+    max-width: 540px;
+    margin-bottom: 40px;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .hero-meta > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .hero-meta .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .hero-meta .value {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* Hero right - stat card */
+  .hero-card {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-soft) 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+  }
+  .hero-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+  }
+  .hero-card-header .tag {
+    color: var(--accent);
+    padding: 2px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+  }
+  .hero-score {
+    font-family: 'Fraunces', serif;
+    font-size: 88px;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-score .total {
+    font-size: 24px;
+    color: var(--text-soft);
+    font-weight: 300;
+    -webkit-text-fill-color: var(--text-soft);
+  }
+  .hero-score-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 32px;
+  }
+  .engine-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .engine-bar {
+    display: grid;
+    grid-template-columns: 90px 1fr 40px;
+    gap: 16px;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .engine-bar .name {
+    color: var(--text-dim);
+  }
+  .engine-bar .track {
+    height: 4px;
+    background: var(--bg-elevated);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+  .engine-bar .fill {
+    height: 100%;
+    border-radius: 100px;
+    transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .engine-bar.a .fill { background: linear-gradient(90deg, var(--engine-a), transparent); width: 72%; }
+  .engine-bar.b .fill { background: linear-gradient(90deg, var(--engine-b), transparent); width: 81%; }
+  .engine-bar.c .fill { background: linear-gradient(90deg, var(--engine-c), transparent); width: 64%; }
+  .engine-bar .value {
+    color: var(--text);
+    text-align: right;
+    font-weight: 500;
+  }
+  .engine-bar.a .value { color: var(--engine-a); }
+  .engine-bar.b .value { color: var(--engine-b); }
+  .engine-bar.c .value { color: var(--engine-c); }
+
+  /* Section header */
+  .section-header {
+    margin-bottom: 64px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px;
+    align-items: baseline;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    padding-top: 16px;
+    border-top: 1px solid var(--accent);
+    width: 60px;
+  }
+  .section-title-wrap h2 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-weight: 400;
+    font-size: clamp(32px, 4vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  .section-title-wrap h2 .italic {
+    font-style: italic;
+    color: var(--text-dim);
+  }
+  .section-title-wrap .subtitle {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 16px;
+    color: var(--text-dim);
+    max-width: 680px;
+    line-height: 1.75;
+  }
+
+  /* Engines section */
+  .engines {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .engine-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .engine-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--line-strong);
+  }
+  .engine-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    opacity: 0.6;
+  }
+  .engine-card.a::before { background: linear-gradient(90deg, var(--engine-a), transparent); }
+  .engine-card.b::before { background: linear-gradient(90deg, var(--engine-b), transparent); }
+  .engine-card.c::before { background: linear-gradient(90deg, var(--engine-c), transparent); }
+
+  .engine-card .idx {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-soft);
+    letter-spacing: 0.15em;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .engine-card .weight {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .engine-card.a .weight { color: var(--engine-a); }
+  .engine-card.b .weight { color: var(--engine-b); }
+  .engine-card.c .weight { color: var(--engine-c); }
+  .engine-card h3 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .engine-card .en {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-soft);
+    letter-spacing: 0.1em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+  .engine-card p {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.75;
+    margin-bottom: 24px;
+  }
+  .engine-card .signals {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+  .engine-card .signals li {
+    list-style: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  .engine-card .signals li::before {
+    content: '—';
+    color: var(--text-soft);
+    flex-shrink: 0;
+  }
+  .engine-card .badge-new {
+    position: absolute;
+    top: 28px;
+    right: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    padding: 3px 8px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+    background: rgba(94, 234, 212, 0.06);
+  }
+
+  /* Modes section */
+  .modes {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .mode-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .mode-card:hover {
+    border-color: var(--line-strong);
+    transform: translateY(-2px);
+    box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.4);
+  }
+  .mode-card .mode-num {
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--text-soft);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .mode-card h3 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 32px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .mode-card .en {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .mode-card .desc {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14.5px;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+  .mode-card .trigger {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-soft);
+    padding: 16px 20px;
+    background: var(--bg-soft);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 24px;
+    line-height: 1.8;
+  }
+  .mode-card .trigger em {
+    color: var(--text);
+    font-style: normal;
+    font-weight: 500;
+  }
+  .mode-card .output-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-soft);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .mode-card .output-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mode-card .output-list li {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
+  .mode-card .output-list li::before {
+    content: '◆';
+    color: var(--accent);
+    font-size: 8px;
+    flex-shrink: 0;
+  }
+
+  .mode-card.new::after {
+    content: 'v2.0 新增';
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    padding: 4px 10px;
+    background: rgba(94, 234, 212, 0.08);
+    border: 1px solid rgba(94, 234, 212, 0.3);
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Signal matrix */
+  .signal-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .signal-table thead {
+    background: var(--bg-soft);
+  }
+  .signal-table th {
+    padding: 20px 24px;
+    text-align: left;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 500;
+    border-bottom: 1px solid var(--line);
+  }
+  .signal-table td {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .signal-table tr:last-child td { border-bottom: none; }
+  .signal-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .signal-table .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+  .signal-table .status {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 16px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .signal-table .status .en {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-soft);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 2px;
+    font-weight: 400;
+  }
+  .signal-table .thresh {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-soft);
+  }
+
+  /* SKU grid */
+  .sku-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .sku-card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 28px;
+    transition: all 0.3s ease;
+  }
+  .sku-card:hover {
+    border-color: var(--accent);
+    background: var(--bg-elevated);
+  }
+  .sku-card .cat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .sku-card h4 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    letter-spacing: -0.01em;
+  }
+  .sku-card p {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .sku-card .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .sku-card .items span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 9px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: var(--text-soft);
+  }
+
+  /* Customer types */
+  .customers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .customer-card {
+    padding: 32px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--bg-card);
+    position: relative;
+  }
+  .customer-card .type-num {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .customer-card h4 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 24px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .customer-card .en {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-soft);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .customer-card .rule {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    padding: 14px;
+    background: var(--bg-soft);
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+  .customer-card .rule strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .customer-card .strategy {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .customer-card .strategy strong { color: var(--accent); font-weight: 500; }
+
+  /* Workflow */
+  .workflow {
+    background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-soft) 100%);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .workflow::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .workflow-steps {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    position: relative;
+    z-index: 1;
+  }
+  .workflow-step {
+    padding: 24px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .workflow-step:hover {
+    border-color: var(--accent);
+    background: var(--bg-elevated);
+  }
+  .workflow-step .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  .workflow-step h5 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .workflow-step p {
+    font-size: 12px;
+    color: var(--text-soft);
+    line-height: 1.6;
+  }
+  .workflow-step .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line-strong);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  /* Data source strip */
+  .data-strip {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .data-strip h3 {
+    font-family: 'Fraunces', 'Noto Serif SC', serif;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .data-strip p {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .endpoints {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .endpoint {
+    padding: 10px 14px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .endpoint .check {
+    color: var(--accent);
+    font-size: 10px;
+  }
+  .endpoint.new::after {
+    content: 'NEW';
+    margin-left: auto;
+    font-size: 8px;
+    color: var(--accent);
+    padding: 2px 6px;
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Version */
+  .version-section {
+    padding: 60px 40px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    max-width: none;
+    background: var(--bg-soft);
+  }
+  .version-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  .version-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .version-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .version-list li {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    padding-left: 28px;
+    position: relative;
+  }
+  .version-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 16px;
+    height: 1px;
+    background: var(--accent);
+  }
+  .version-list li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* Footer */
+  footer {
+    padding: 60px 40px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+  footer .sig {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  footer .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-soft);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* Diagonal divider */
+  .divider-diagonal {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    color: var(--text-soft);
+  }
+  .divider-diagonal hr {
+    flex: 1;
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line), transparent);
+  }
+  .divider-diagonal span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  /* Responsive */
+  @media (max-width: 960px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .engines, .modes, .sku-grid, .customers { grid-template-columns: 1fr; }
+    .workflow-steps { grid-template-columns: 1fr 1fr; }
+    .workflow { padding: 32px; }
+    .data-strip { grid-template-columns: 1fr; }
+    .version-grid { grid-template-columns: 1fr; }
+    section { padding: 60px 24px; }
+    .hero { padding: 100px 24px 60px; }
+    nav { padding: 16px 24px; }
+    nav .meta .path { display: none; }
+  }
+
+  /* Fade-in on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+<div class="aurora"></div>
+
+<nav>
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <span>etf-growth</span>
+    <span>·</span>
+    <span>Intelligence System</span>
+  </div>
+  <div class="meta">
+    <span class="path">Driven · Skill</span>
+    <span class="live">v2.0 · active</span>
+  </div>
+</nav>
+
+<main>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-label">
+        <span>雪球商业化销售 · 决策助手</span>
+      </div>
+      <h1>
+        ETF <span class="italic">营销雷达</span><br>
+        数据 <span class="highlight">·</span> 话术 <span class="highlight">·</span> 弹药
+      </h1>
+      <p class="hero-lead">
+        给雪球商业化销售团队（金融业务线 · ETF 方向）的单品 / 全司 / 竞品 / 赛道四模式决策工具。从雪球站内生态数据出发，在基金公司自己发现机会之前，把 "哪只 ETF 该做持营、这条赛道今天适不适合推、客户要听到什么才会买账" 一次讲清楚。
+      </p>
+      <div class="hero-meta">
+        <div>
+          <span class="label">Version</span>
+          <span class="value">v2.0</span>
+        </div>
+        <div>
+          <span class="label">Modes</span>
+          <span class="value">04</span>
+        </div>
+        <div>
+          <span class="label">Engines</span>
+          <span class="value">03</span>
+        </div>
+        <div>
+          <span class="label">Sectors</span>
+          <span class="value">79</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-card-header">
+        <span>Sample · Opportunity Score</span>
+        <span class="tag">LIVE</span>
+      </div>
+      <div class="hero-score">
+        83<span class="total"> / 100</span>
+      </div>
+      <div class="hero-score-label">综合营销机会评分 · 双引擎共振状态</div>
+      <div class="engine-bars">
+        <div class="engine-bar a">
+          <span class="name">A · 行情</span>
+          <div class="track"><div class="fill"></div></div>
+          <span class="value">72</span>
+        </div>
+        <div class="engine-bar b">
+          <span class="name">B · 生态</span>
+          <div class="track"><div class="fill"></div></div>
+          <span class="value">81</span>
+        </div>
+        <div class="engine-bar c">
+          <span class="name">C · 竞品</span>
+          <div class="track"><div class="fill"></div></div>
+          <span class="value">64</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-diagonal"><hr><span>01 · Scoring Framework</span><hr></div>
+
+<!-- ENGINES -->
+<section class="reveal">
+  <div class="section-header">
+    <div class="section-num">01 / 04</div>
+    <div class="section-title-wrap">
+      <h2>三引擎 <span class="italic">评分体系</span></h2>
+      <p class="subtitle">
+        100 分制综合评分 = 0.35×A + 0.40×B + 0.25×C。引擎 B 是雪球独有价值，也是基金公司真正想买的情报——他们在自家后台看不到这层。
+      </p>
+    </div>
+  </div>
+
+  <div class="engines">
+    <div class="engine-card a">
+      <div class="idx"><span>Engine A</span><span class="weight">35%</span></div>
+      <h3>客观行情</h3>
+      <div class="en">Market Signals</div>
+      <p>时效性信号。基金公司自己也有，但我们扫全市场更快、更快发现起势苗头。</p>
+      <ul class="signals">
+        <li>涨跌幅（日 / 5日 / 20日）</li>
+        <li>成交额放大倍数</li>
+        <li>换手率 · 溢折价</li>
+        <li>振幅 · 相对强度</li>
+      </ul>
+    </div>
+
+    <div class="engine-card b">
+      <span class="badge-new">V2.0 升级</span>
+      <div class="idx"><span>Engine B</span><span class="weight">40%</span></div>
+      <h3>生态势能</h3>
+      <div class="en">Ecosystem Energy</div>
+      <p>v2.0 新增行为势能模块。讨论 + 行为 + KOL 三层合成——让 follow7d 这类"聪明资金注意力"信号成为持营判断的最前置依据。</p>
+      <ul class="signals">
+        <li>B1 · 讨论势能（L1-L4 四层）</li>
+        <li>B2 · 行为势能（follow7d + hot_stock）</li>
+        <li>B3 · KOL 卷入度</li>
+      </ul>
+    </div>
+
+    <div class="engine-card c">
+      <div class="idx"><span>Engine C</span><span class="weight">25%</span></div>
+      <h3>竞品对标</h3>
+      <div class="en">Competitive Landscape</div>
+      <p>同指数 ETF 横向比较。触发基金公司"看对手动作做决策"的心理，也是白地识别的基础。</p>
+      <ul class="signals">
+        <li>规模对标</li>
+        <li>费率对比</li>
+        <li>近期表现超额</li>
+        <li>态势 A/B/C 判定</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider-diagonal"><hr><span>02 · Usage Modes</span><hr></div>
+
+<!-- MODES -->
+<section class="reveal">
+  <div class="section-header">
+    <div class="section-num">02 / 04</div>
+    <div class="section-title-wrap">
+      <h2>四种 <span class="italic">使用模式</span></h2>
+      <p class="subtitle">
+        单品 × 全司 × 竞品 × 赛道推荐——模式四是 v2.0 的核心新增，响应一线销售"客户问我今天站内哪些赛道热"的高频需求。
+      </p>
+    </div>
+  </div>
+
+  <div class="modes">
+    <div class="mode-card">
+      <div class="mode-num">— Mode I</div>
+      <h3>单品诊断</h3>
+      <div class="en">Single ETF Analysis</div>
+      <p class="desc">针对一只 ETF 的完整营销诊断，从行情到生态到竞品格局，一份可以直接带去客户会的机会简报。</p>
+      <div class="trigger">
+        <em>"159995 适合持营吗"</em><br>
+        <em>"给我华夏芯片 ETF 的客户弹药"</em>
+      </div>
+      <div class="output-title">CORE OUTPUT</div>
+      <ul class="output-list">
+        <li>一页机会简报（三引擎全分析）</li>
+        <li>客户类型适配话术（3 态 × 3 类 = 9 套变体）</li>
+        <li>SKU 推荐组合 + 参考案例</li>
+      </ul>
+    </div>
+
+    <div class="mode-card">
+      <div class="mode-num">— Mode II</div>
+      <h3>全司地图</h3>
+      <div class="en">Fund House Portfolio Scan</div>
+      <p class="desc">扫描某家基金公司旗下全部 ETF，自动分层排优先级，输出全司营销地图 + 跨产品协同建议。</p>
+      <div class="trigger">
+        <em>"华夏基金旗下哪些 ETF 值得推"</em><br>
+        <em>"华泰柏瑞全司 ETF 扫一遍"</em>
+      </div>
+      <div class="output-title">CORE OUTPUT</div>
+      <ul class="output-list">
+        <li>ETF 优先级矩阵 · 四档分层</li>
+        <li>按赛道的产品矩阵聚类</li>
+        <li>共享 KOL 池 / 联合话题建议</li>
+      </ul>
+    </div>
+
+    <div class="mode-card">
+      <div class="mode-num">— Mode III</div>
+      <h3>竞品格局</h3>
+      <div class="en">Peer Competitive Landscape</div>
+      <p class="desc">同一指数赛道的横向竞争格局 + 白地分析——找出那些"社区已讨论但竞品未跟上"的窗口。</p>
+      <div class="trigger">
+        <em>"沪深300 ETF 赛道比一比"</em><br>
+        <em>"AI 算力 ETF 谁在领跑"</em>
+      </div>
+      <div class="output-title">CORE OUTPUT</div>
+      <ul class="output-list">
+        <li>竞争格局矩阵（全家横向对比）</li>
+        <li>白地 ETF 清单 + 饥渴度指数</li>
+        <li>领先者 / 红海 / 落后者分别话术</li>
+      </ul>
+    </div>
+
+    <div class="mode-card new">
+      <div class="mode-num">— Mode IV</div>
+      <h3>赛道推荐</h3>
+      <div class="en">Sector Momentum Radar · Reverse Query</div>
+      <p class="desc">反向查询——不问 ETF，直接回答"今天站内哪些赛道势能最强、应该去找哪些客户聊什么"。基于 follow7d 行为数据的反向映射。</p>
+      <div class="trigger">
+        <em>"今天站内哪些赛道最热"</em><br>
+        <em>"本周适合推哪个赛道"</em><br>
+        <em>"给我今日 ETF 营销榜"</em>
+      </div>
+      <div class="output-title">CORE OUTPUT</div>
+      <ul class="output-list">
+        <li>TOP 5 热门赛道榜 · 综合分</li>
+        <li>白地赛道清单（讨论已热、行情未跟）</li>
+        <li>建议优先沟通的基金公司 + 对应 ETF</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider-diagonal"><hr><span>03 · Signal Matrix</span><hr></div>
+
+<!-- SIGNAL MATRIX -->
+<section class="reveal">
+  <div class="section-header">
+    <div class="section-num">03 / 04</div>
+    <div class="section-title-wrap">
+      <h2>共振 <span class="italic">判定矩阵</span></h2>
+      <p class="subtitle">
+        A 引擎（行情）× B 引擎（生态）的共振状态决定当下的营销价值。v2.0 取消"立即行动 / 暂不推"的强判定——我们给共振状态 + 方向，决策交给销售和客户。
+      </p>
+    </div>
+  </div>
+
+  <table class="signal-table">
+    <thead>
+      <tr>
+        <th style="width: 24%">共振状态</th>
+        <th style="width: 12%">A 阈值</th>
+        <th style="width: 12%">B 阈值</th>
+        <th style="width: 52%">含义与方向</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="status"><span class="dot" style="background:#f97066;box-shadow:0 0 8px #f97066"></span>双引擎共振<span class="en">Dual Resonance</span></span></td>
+        <td><span class="thresh">≥ 60</span></td>
+        <td><span class="thresh">≥ 60</span></td>
+        <td>最佳持营窗口：行情起、生态热，两端同步。出数据、出方案、排沟通。</td>
+      </tr>
+      <tr>
+        <td><span class="status"><span class="dot" style="background:#5eead4;box-shadow:0 0 8px #5eead4"></span>白地期<span class="en">White Space</span></span></td>
+        <td><span class="thresh">&lt; 40</span></td>
+        <td><span class="thresh">≥ 70</span></td>
+        <td>上游讨论已热、行情未同步——营销空窗期。铺投教、占心智、抢窗口。</td>
+      </tr>
+      <tr>
+        <td><span class="status"><span class="dot" style="background:#eab308;box-shadow:0 0 8px #eab308"></span>有行情无讨论<span class="en">Market · No Echo</span></span></td>
+        <td><span class="thresh">≥ 70</span></td>
+        <td><span class="thresh">&lt; 40</span></td>
+        <td>行情带起但生态冷。引导社区跟进、补内容、做星推官铺。</td>
+      </tr>
+      <tr>
+        <td><span class="status"><span class="dot" style="background:#d4a574;box-shadow:0 0 8px #d4a574"></span>双向温热<span class="en">Warm · Steady</span></span></td>
+        <td><span class="thresh">≥ 50</span></td>
+        <td><span class="thresh">≥ 50</span></td>
+        <td>常规节奏。维持基础曝光、跟进观察动向。</td>
+      </tr>
+      <tr>
+        <td><span class="status"><span class="dot" style="background:#6b7080"></span>冷却期<span class="en">Cooling Down</span></span></td>
+        <td><span class="thresh">&lt; 50</span></td>
+        <td><span class="thresh">&lt; 50</span></td>
+        <td>非营销时机。入观察池、等下次扫描重看。</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="divider-diagonal"><hr><span>04 · Customer Segmentation</span><hr></div>
+
+<!-- CUSTOMER TYPES -->
+<section class="reveal">
+  <div class="section-header">
+    <div class="section-num">04 / 04</div>
+    <div class="section-title-wrap">
+      <h2>客户分层 <span class="italic">× 话术矩阵</span></h2>
+      <p class="subtitle">
+        客户决策逻辑不同，销售打法就不同。v2.0 将客户分三类，与态势交叉产生 9 套话术变体——投研驱动的客户产品已定，只聊"怎么投"；渠道驱动的客户要数据 + SKU 套餐；新进小厂要低门槛试水。
+      </p>
+    </div>
+  </div>
+
+  <div class="customers">
+    <div class="customer-card">
+      <div class="type-num">— Type I</div>
+      <h4>投研驱动型</h4>
+      <div class="en">Research-Led</div>
+      <div class="rule">识别：国泰、富国等。<strong>投研定产品、渠道选工具</strong>。</div>
+      <div class="strategy">话术聚焦 <strong>怎么投</strong> —— SKU 组合、ROI、执行路径。少讲"值不值得做"。</div>
+    </div>
+
+    <div class="customer-card">
+      <div class="type-num">— Type II</div>
+      <h4>渠道驱动型</h4>
+      <div class="en">Channel-Led</div>
+      <div class="rule">识别：大多数头部基金。<strong>看数据做决策</strong>。</div>
+      <div class="strategy">话术聚焦 <strong>投哪个 + 怎么投</strong> —— 数据先行、赛道推荐、SKU 套餐、参考案例。</div>
+    </div>
+
+    <div class="customer-card">
+      <div class="type-num">— Type III</div>
+      <h4>ETF 新进小厂</h4>
+      <div class="en">ETF Newcomer</div>
+      <div class="rule">识别：在管 ETF ≤ 3 只 或 合计规模 &lt; 50 亿。<strong>要声量、要教育市场</strong>。</div>
+      <div class="strategy">话术聚焦 <strong>要不要下场 + 低门槛试水</strong> —— 投教先行、差异化定位。</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-diagonal"><hr><span>05 · SKU Recommendation Engine</span><hr></div>
+
+<!-- SKU -->
+<section class="reveal">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title-wrap">
+      <h2>SKU <span class="italic">推荐引擎</span></h2>
+      <p class="subtitle">
+        对接《2026 雪球 ETF 产品服务手册》的完整 SKU 体系。按 "营销态势 × 客户类型" 组合匹配，每份报告给出 3 个核心推荐 + 2-3 个可选补充，附真实合作案例背书。
+      </p>
+    </div>
+  </div>
+
+  <div class="sku-grid">
+    <div class="sku-card">
+      <div class="cat">A · Content IP</div>
+      <h4>内容 IP 类</h4>
+      <p>几乎所有态势的基础配置。星推官是几乎必配，猜涨跌、刮刮乐等轻量玩法搭配用。</p>
+      <div class="items">
+        <span>雪球 ETF 星推官</span>
+        <span>板块预言家</span>
+        <span>ETF 猜涨跌</span>
+        <span>财富刮刮乐 H5</span>
+        <span>开锦囊 H5</span>
+        <span>答题闯关 H5</span>
+      </div>
+    </div>
+
+    <div class="sku-card">
+      <div class="cat">B · Hard Ads</div>
+      <h4>硬广资源</h4>
+      <p>流量放大器。节点性强曝光、持续曝光位、精准成分股触达位。</p>
+      <div class="items">
+        <span>开屏 3s/5s</span>
+        <span>焦点图 2/4/6 帧</span>
+        <span>信息流 4/12/20</span>
+        <span>评论流第 6</span>
+        <span>热榜页推送</span>
+        <span>话题位 2/4</span>
+      </div>
+    </div>
+
+    <div class="sku-card">
+      <div class="cat">C · Scenario</div>
+      <h4>场景化资源</h4>
+      <p>高转化场景嫁接。新用户首购、开户流程、券商联动。</p>
+      <div class="items">
+        <span>极速开户页 ETF 卡片</span>
+        <span>All-In 开户场景页</span>
+        <span>7 家券商开户支持</span>
+      </div>
+    </div>
+
+    <div class="sku-card">
+      <div class="cat">D · Signature IP</div>
+      <h4>深度 IP / 体系化活动</h4>
+      <p>心智武器级 SKU。红海突围的顶级模板，真实跑通过案例。</p>
+      <div class="items">
+        <span>一只指数的诞生</span>
+        <span>ETF 全民投资俱乐部</span>
+        <span>超级小程序合作</span>
+        <span>上市当日专项</span>
+        <span>募集期深植概念</span>
+      </div>
+    </div>
+
+    <div class="sku-card">
+      <div class="cat">E · Official Matrix</div>
+      <h4>账号生态</h4>
+      <p>官方账号矩阵组合曝光。分场景匹配最合适的账号。</p>
+      <div class="items">
+        <span>ETF 热榜追基</span>
+        <span>今日话题 1700W 粉</span>
+        <span>雪球活动 1200W 粉</span>
+        <span>雪球达人秀 600W 粉</span>
+        <span>ETF 星推官官方号</span>
+      </div>
+    </div>
+
+    <div class="sku-card">
+      <div class="cat">F · Influence</div>
+      <h4>影响力合作（高净值）</h4>
+      <p>领先者专用。年度深度绑定、高净值心智护城河。</p>
+      <div class="items">
+        <span>方略对话栏目</span>
+        <span>雪球参考精品纸刊</span>
+        <span>播客节目</span>
+        <span>雪球嘉年华</span>
+        <span>指数基金领袖峰会</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-diagonal"><hr><span>06 · Workflow</span><hr></div>
+
+<!-- WORKFLOW -->
+<section class="reveal">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title-wrap">
+      <h2>单次调用 <span class="italic">工作流</span></h2>
+      <p class="subtitle">
+        从销售说出自然语言需求，到拿到一份可直接发客户的机会简报，全流程 2-5 分钟。无需记命令、无需懂 API。
+      </p>
+    </div>
+  </div>
+
+  <div class="workflow">
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <div class="icon">→</div>
+        <div class="step-num">STEP 01</div>
+        <h5>自然语言输入</h5>
+        <p>销售直接说需求，AI 识别模式并定位标的。</p>
+      </div>
+      <div class="workflow-step">
+        <div class="icon">◇</div>
+        <div class="step-num">STEP 02</div>
+        <h5>三引擎并行扫描</h5>
+        <p>行情、生态、竞品三引擎并行拉取，30+ API 调用并发。</p>
+      </div>
+      <div class="workflow-step">
+        <div class="icon">⎔</div>
+        <div class="step-num">STEP 03</div>
+        <h5>共振判定</h5>
+        <p>综合打分、白地识别、态势归类，自动生成核心判定。</p>
+      </div>
+      <div class="workflow-step">
+        <div class="icon">✦</div>
+        <div class="step-num">STEP 04</div>
+        <h5>客户类型适配</h5>
+        <p>按客户类型拼装话术，投研 / 渠道 / 新进各走分支。</p>
+      </div>
+      <div class="workflow-step">
+        <div class="icon">✓</div>
+        <div class="step-num">STEP 05</div>
+        <h5>SKU + 案例输出</h5>
+        <p>推荐 SKU 组合 + 真实合作案例背书，生成可发简报。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider-diagonal"><hr><span>07 · Data Foundation</span><hr></div>
+
+<!-- DATA -->
+<section class="reveal">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title-wrap">
+      <h2>数据 <span class="italic">底座</span></h2>
+      <p class="subtitle">
+        雪球 xq API 11 个核心端点 + Wind 官方主题标签 81 只权威锚点 + 手工清洗赛道词典 79 条 + PDF 手册结构化案例库 13 个。所有端点经 Driven 侧实测验证。
+      </p>
+    </div>
+  </div>
+
+  <div class="data-strip">
+    <div>
+      <h3>11 个验证端点</h3>
+      <p>覆盖行情、讨论、行为、KOL、话题五大数据维度。所有端点经过 Driven 平台实测，带明确的字段约定和踩坑记录。</p>
+    </div>
+    <div class="endpoints">
+      <div class="endpoint"><span class="check">●</span>search/stock.json</div>
+      <div class="endpoint"><span class="check">●</span>quotec.json</div>
+      <div class="endpoint"><span class="check">●</span>f10/company.json</div>
+      <div class="endpoint"><span class="check">●</span>chart/kline.json</div>
+      <div class="endpoint"><span class="check">●</span>symbol/search/status.json</div>
+      <div class="endpoint"><span class="check">●</span>search/all.json</div>
+      <div class="endpoint"><span class="check">●</span>hot_event/tag.json</div>
+      <div class="endpoint"><span class="check">●</span>stock/hot_user.json</div>
+      <div class="endpoint new"><span class="check">●</span>hot_stock/list.json</div>
+      <div class="endpoint new"><span class="check">●</span>screener/screen.json</div>
+      <div class="endpoint"><span class="check">●</span>stock/quote.json</div>
+    </div>
+  </div>
+</section>
+
+<!-- VERSION / CHANGELOG -->
+<div class="version-section">
+  <div class="version-inner">
+    <div class="version-grid">
+      <div>
+        <div class="section-num" style="padding-top:0;border:none;margin-bottom:16px">CHANGELOG</div>
+        <h2 style="font-family:'Fraunces','Noto Serif SC',serif;font-weight:400;font-size:48px;line-height:1.05;letter-spacing:-0.02em;margin-bottom:24px">
+          v1.0 <span style="font-style:italic;color:var(--text-dim)">→</span> v2.0
+        </h2>
+        <p style="font-family:'Noto Serif SC',serif;font-size:15px;color:var(--text-dim);line-height:1.8">
+          基于华东、华北华南销售 Leader 一线反馈 + 雪球 2026 ETF 产品服务手册完整结构化，在 VP 初版基础上完成八个核心方向的升级。
+        </p>
+      </div>
+      <div>
+        <ul class="version-list">
+          <li><strong>术语全量</strong>改为"商业化销售"——原 RM / BD 措辞全清。</li>
+          <li><strong>新增模式四 · 赛道推荐</strong>——反向查询，响应一线最高频的"今天哪些赛道热"需求。</li>
+          <li><strong>引擎 B 升级</strong>为讨论 + 行为 + KOL 三模块——follow7d 作为最前置信号。</li>
+          <li><strong>新增客户类型分层</strong>——投研 / 渠道 / 新进小厂，态势 × 客户 = 9 套话术。</li>
+          <li><strong>新增 SKU 推荐引擎</strong>——对接手册完整 SKU 体系 + 真实合作案例库。</li>
+          <li><strong>取消"立即行动"等强判定</strong>——给共振状态 + 方向，决策权在销售和客户。</li>
+          <li><strong>Wind 官方标签作为硬背书</strong>——81 只 ETF 命中时对外可引用。</li>
+          <li><strong>赛道词典结构化</strong>——13 大类 × 79 二级赛道，含关键词 + 锚点 ETF + 典型成分股三元组。</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="sig">Built for Xueqiu Commercial Sales · Finance Line · ETF Vertical</div>
+  <div class="meta">etf-growth v2.0 · 2026 · Driven Skill · 内部参考</div>
+</footer>
+
+</main>
+
+<script>
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('in');
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Animate score on load
+  window.addEventListener('load', () => {
+    const score = document.querySelector('.hero-score');
+    let current = 0;
+    const target = 83;
+    const duration = 1500;
+    const startTime = performance.now();
+    function step(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      current = Math.round(eased * target);
+      score.innerHTML = current + '<span class="total"> / 100</span>';
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+</script>
+</body>
+</html>
