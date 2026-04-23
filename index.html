@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETF 营销雷达 v2.1 · 雪球商业化销售决策助手 · 项目全貌</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Palette: deep ink with cool metallic accents — Bloomberg × Linear */
+    --bg: #0b0d10;
+    --bg-1: #0f1216;
+    --bg-2: #14181e;
+    --bg-3: #1b2027;
+    --bg-4: #232832;
+    --line: rgba(255,255,255,0.06);
+    --line-2: rgba(255,255,255,0.1);
+    --line-3: rgba(255,255,255,0.16);
+    --text: #eef0f3;
+    --text-2: #a9b0bc;
+    --text-3: #6d7484;
+    --text-4: #464c58;
+
+    /* Metallic accents */
+    --gold: #c9a961;     /* warm metallic — version markers */
+    --teal: #3cc8b5;     /* cool metallic — primary action */
+    --xq: #4591ff;       /* xueqiu blue — accent only */
+    --crimson: #ea5454;  /* critical */
+    --amber: #e6a23c;    /* warning */
+    --jade: #4fba6a;     /* success */
+
+    /* Engines */
+    --eng-a: #e6a23c;
+    --eng-b: #3cc8b5;
+    --eng-c: #a67aff;
+
+    /* Typography */
+    --ff-display: 'Instrument Serif', 'Noto Serif SC', serif;
+    --ff-body: 'Inter Tight', 'Noto Serif SC', -apple-system, BlinkMacSystemFont, sans-serif;
+    --ff-cn: 'Noto Serif SC', serif;
+    --ff-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--ff-body);
+    font-weight: 400;
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv01";
+  }
+
+  /* Subtle grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 100;
+    mix-blend-mode: overlay;
+  }
+
+  /* Atmosphere glow */
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-glow::before, .bg-glow::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.08;
+  }
+  .bg-glow::before {
+    width: 900px; height: 900px;
+    top: -400px; left: -300px;
+    background: radial-gradient(circle, var(--teal), transparent 60%);
+  }
+  .bg-glow::after {
+    width: 700px; height: 700px;
+    bottom: -200px; right: -200px;
+    background: radial-gradient(circle, var(--gold), transparent 60%);
+  }
+
+  /* ------ NAV ------ */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(11, 13, 16, 0.72);
+    border-bottom: 1px solid var(--line);
+  }
+  nav .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: var(--ff-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  nav .brand-mark {
+    width: 22px; height: 22px;
+    position: relative;
+    transform: rotate(45deg);
+  }
+  nav .brand-mark::before,
+  nav .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1.2px solid var(--teal);
+  }
+  nav .brand-mark::after {
+    inset: 4px;
+    background: var(--teal);
+    opacity: 0.3;
+  }
+  nav .brand-text .cn {
+    color: var(--text);
+    font-family: var(--ff-cn);
+    font-weight: 500;
+    font-size: 13px;
+  }
+  nav .brand-text .en {
+    color: var(--text-3);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  nav .status {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    text-transform: uppercase;
+  }
+  nav .status .version {
+    color: var(--gold);
+    padding: 3px 10px;
+    border: 1px solid rgba(201, 169, 97, 0.3);
+    border-radius: 100px;
+    background: rgba(201, 169, 97, 0.05);
+  }
+  nav .status .live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  nav .status .live::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px var(--teal);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  main {
+    position: relative;
+    z-index: 2;
+    padding-top: 76px;
+  }
+
+  .container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ------ HERO ------ */
+  .hero {
+    position: relative;
+    padding: 100px 0 80px;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 40px;
+  }
+  .hero-eyebrow::before,
+  .hero-eyebrow::after {
+    content: '';
+    flex: 0 0 32px;
+    height: 1px;
+    background: var(--line-3);
+  }
+
+  .hero-headline {
+    font-family: var(--ff-display);
+    font-weight: 400;
+    font-size: clamp(56px, 8.5vw, 108px);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    margin-bottom: 56px;
+  }
+  .hero-headline .cn {
+    font-family: var(--ff-cn);
+    font-weight: 400;
+    display: block;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 80px;
+    align-items: end;
+    margin-top: 64px;
+  }
+  .hero-lead {
+    font-family: var(--ff-cn);
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--text-3);
+    max-width: 560px;
+  }
+  .hero-lead strong {
+    color: var(--text-2);
+    font-weight: 500;
+  }
+  .hero-lead .highlight {
+    color: var(--teal);
+    font-weight: 500;
+  }
+
+  .hero-pitch-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .hero-pitch {
+    font-family: var(--ff-cn);
+    font-weight: 500;
+    font-size: clamp(22px, 2.8vw, 32px);
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    max-width: 600px;
+    position: relative;
+    padding-left: 20px;
+    border-left: 2px solid var(--teal);
+  }
+  .hero-pitch .quote {
+    color: var(--teal);
+    font-family: var(--ff-display);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+  .hero-pitch .gold-emph {
+    color: var(--gold);
+    position: relative;
+    display: inline-block;
+  }
+  .hero-pitch .gold-emph::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 2px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  /* Key stats */
+  .keystats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .keystat {
+    background: var(--bg-1);
+    padding: 28px 24px;
+    position: relative;
+  }
+  .keystat .label {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .keystat .value {
+    font-family: var(--ff-display);
+    font-size: 56px;
+    font-weight: 400;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .keystat .value .unit {
+    font-family: var(--ff-body);
+    font-size: 14px;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+  .keystat .sub {
+    font-family: var(--ff-cn);
+    font-size: 12px;
+    color: var(--text-3);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* ------ SECTION HEADER ------ */
+  section {
+    position: relative;
+    padding: 100px 0;
+  }
+  .section-meta {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 40px;
+    margin-bottom: 64px;
+    align-items: start;
+  }
+  .section-idx {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding-top: 18px;
+    border-top: 1px solid var(--gold);
+  }
+  .section-head h2 {
+    font-family: var(--ff-display);
+    font-weight: 400;
+    font-size: clamp(38px, 5vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin-bottom: 20px;
+  }
+  .section-head h2 .cn {
+    font-family: var(--ff-cn);
+    font-weight: 400;
+  }
+  .section-head h2 .italic {
+    font-style: italic;
+    color: var(--text-2);
+  }
+  .section-head .desc {
+    font-family: var(--ff-cn);
+    font-size: 16px;
+    color: var(--text-2);
+    max-width: 720px;
+    line-height: 1.75;
+  }
+  .section-head .desc strong { color: var(--text); font-weight: 500; }
+
+  /* ------ TIMELINE ------ */
+  .timeline {
+    position: relative;
+    margin-left: 120px;
+    padding-left: 40px;
+    border-left: 1px solid var(--line-2);
+  }
+  .tl-step {
+    position: relative;
+    padding-bottom: 72px;
+  }
+  .tl-step:last-child { padding-bottom: 0; }
+  .tl-step::before {
+    content: '';
+    position: absolute;
+    left: -46px;
+    top: 6px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--text-3);
+  }
+  .tl-step.current::before {
+    background: var(--teal);
+    border-color: var(--teal);
+    box-shadow: 0 0 0 4px rgba(60, 200, 181, 0.12);
+  }
+  .tl-step.gold::before {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .tl-step .tl-ver {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 6px;
+  }
+  .tl-step .tl-ver .v {
+    font-family: var(--ff-display);
+    font-style: italic;
+    font-size: 36px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .tl-step.current .tl-ver .v { color: var(--teal); }
+  .tl-step.gold .tl-ver .v { color: var(--gold); }
+  .tl-step .tl-ver .date {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.1em;
+  }
+  .tl-step .tl-name {
+    font-family: var(--ff-cn);
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .tl-step .tl-changes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .tl-step .tl-change {
+    padding: 16px 18px;
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+  .tl-step .tl-change .tag {
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .tl-step .tl-change .tag.critical { color: var(--crimson); }
+  .tl-step .tl-change .tag.improve { color: var(--teal); }
+  .tl-step .tl-change .tag.new { color: var(--xq); }
+  .tl-step .tl-change .tag.fix { color: var(--amber); }
+  .tl-step .tl-change p {
+    font-family: var(--ff-cn);
+    font-size: 13.5px;
+    color: var(--text-2);
+    line-height: 1.65;
+  }
+  .tl-step .tl-change p strong { color: var(--text); font-weight: 500; }
+  .tl-step .tl-driver {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: linear-gradient(90deg, rgba(201, 169, 97, 0.06), transparent);
+    border-left: 2px solid var(--gold);
+    font-family: var(--ff-cn);
+    font-size: 13px;
+    color: var(--text-2);
+    font-style: italic;
+  }
+  .tl-step .tl-driver .dlabel {
+    font-style: normal;
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  /* ------ FEEDBACK BLOCK ------ */
+  .feedback-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .feedback-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .feedback-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .feedback-card .src {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .feedback-card blockquote {
+    font-family: var(--ff-cn);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--text);
+    font-style: italic;
+    padding-left: 20px;
+    border-left: 2px solid var(--gold);
+    margin-bottom: 24px;
+  }
+  .feedback-card .arrow {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .feedback-card .action {
+    font-family: var(--ff-cn);
+    font-size: 14px;
+    color: var(--teal);
+    line-height: 1.7;
+  }
+  .feedback-card .action strong { color: var(--text); font-weight: 500; }
+
+  /* ------ MODES ------ */
+  .modes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .mode-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 36px;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .mode-card:hover {
+    border-color: var(--line-3);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.4);
+  }
+  .mode-card .tag-new {
+    position: absolute;
+    top: 32px; right: 32px;
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    color: var(--teal);
+    padding: 3px 9px;
+    background: rgba(60, 200, 181, 0.08);
+    border: 1px solid rgba(60, 200, 181, 0.3);
+    border-radius: 4px;
+    letter-spacing: 0.15em;
+  }
+  .mode-card .mode-num {
+    font-family: var(--ff-display);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--text-3);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .mode-card h3 {
+    font-family: var(--ff-cn);
+    font-size: 30px;
+    font-weight: 500;
+    line-height: 1.1;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+  .mode-card .mode-en {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .mode-card .mode-desc {
+    font-family: var(--ff-cn);
+    font-size: 14.5px;
+    color: var(--text-2);
+    line-height: 1.75;
+    margin-bottom: 24px;
+  }
+  .mode-card .triggers {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: var(--bg-2);
+    border-radius: 8px;
+    border-left: 2px solid var(--teal);
+  }
+  .mode-card .triggers .t {
+    font-family: var(--ff-mono);
+    font-size: 11.5px;
+    color: var(--text-2);
+    letter-spacing: -0.01em;
+  }
+  .mode-card .outputs {
+    margin-top: 16px;
+  }
+  .mode-card .outputs .h {
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .mode-card .outputs ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mode-card .outputs li {
+    font-family: var(--ff-cn);
+    font-size: 13.5px;
+    color: var(--text-2);
+    padding-left: 16px;
+    position: relative;
+  }
+  .mode-card .outputs li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 10px;
+    width: 8px; height: 1px;
+    background: var(--teal);
+  }
+
+  /* ------ ENGINES ------ */
+  .engines-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .engine-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+  }
+  .engine-card.b-engine {
+    background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    border-color: rgba(60, 200, 181, 0.25);
+  }
+  .engine-card .eng-label {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .engine-card.a .eng-label span:first-child { color: var(--eng-a); }
+  .engine-card.b .eng-label span:first-child { color: var(--eng-b); }
+  .engine-card.c .eng-label span:first-child { color: var(--eng-c); }
+  .engine-card .weight {
+    font-family: var(--ff-display);
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .engine-card.a .weight { color: var(--eng-a); }
+  .engine-card.b .weight { color: var(--eng-b); }
+  .engine-card.c .weight { color: var(--eng-c); }
+  .engine-card h3 {
+    font-family: var(--ff-cn);
+    font-size: 26px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .engine-card .en {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .engine-card p {
+    font-family: var(--ff-cn);
+    font-size: 13.5px;
+    color: var(--text-2);
+    line-height: 1.75;
+    margin-bottom: 22px;
+    min-height: 96px;
+  }
+  .engine-card .sub-modules {
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .engine-card .sub-modules .m {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-family: var(--ff-mono);
+    font-size: 11.5px;
+  }
+  .engine-card .sub-modules .m .w {
+    color: var(--text-3);
+    min-width: 32px;
+  }
+  .engine-card .sub-modules .m .n {
+    color: var(--text);
+  }
+  .engine-card .badge-new {
+    position: absolute;
+    top: 28px; right: 28px;
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    color: var(--teal);
+    padding: 3px 9px;
+    background: rgba(60, 200, 181, 0.1);
+    border: 1px solid rgba(60, 200, 181, 0.3);
+    border-radius: 4px;
+    letter-spacing: 0.12em;
+  }
+
+  /* ------ EVIDENCE REPORTS ------ */
+  .evidence-intro {
+    margin-bottom: 48px;
+    padding: 28px 32px;
+    background: linear-gradient(90deg, rgba(60, 200, 181, 0.04), transparent);
+    border-left: 2px solid var(--teal);
+    border-radius: 0 10px 10px 0;
+  }
+  .evidence-intro .label {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--teal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .evidence-intro p {
+    font-family: var(--ff-cn);
+    font-size: 15px;
+    color: var(--text-2);
+    line-height: 1.75;
+  }
+  .evidence-intro p strong { color: var(--text); font-weight: 500; }
+
+  .reports-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .report-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .report-card.span-2 { grid-column: span 2; }
+  .report-card .report-head {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .report-card .report-head .left .cat {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--teal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .report-card .report-head .left h4 {
+    font-family: var(--ff-cn);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .report-card .report-head .left h4 .code {
+    font-family: var(--ff-mono);
+    font-size: 13px;
+    color: var(--text-3);
+    margin-left: 8px;
+    font-weight: 400;
+  }
+  .report-card .report-head .right {
+    text-align: right;
+  }
+  .report-card .report-head .right .verdict {
+    font-family: var(--ff-display);
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .report-card .report-head .right .verdict.gold { color: var(--gold); }
+  .report-card .report-head .right .verdict.teal { color: var(--teal); }
+  .report-card .report-head .right .verdict.crimson { color: var(--crimson); }
+  .report-card .report-head .right .state {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .report-card .report-body {
+    padding: 28px;
+  }
+  .report-card .scores {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .report-card .score {
+    padding: 14px 16px;
+    background: var(--bg-2);
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .report-card .score .eng {
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .report-card .score.a .eng { color: var(--eng-a); }
+  .report-card .score.b .eng { color: var(--eng-b); }
+  .report-card .score.c .eng { color: var(--eng-c); }
+  .report-card .score .val {
+    font-family: var(--ff-display);
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--text);
+  }
+  .report-card .score .total {
+    font-size: 12px;
+    color: var(--text-3);
+    font-family: var(--ff-body);
+    margin-left: 4px;
+  }
+  .report-card .insight {
+    padding: 16px 18px;
+    background: linear-gradient(90deg, rgba(201, 169, 97, 0.05), transparent);
+    border-left: 2px solid var(--gold);
+    font-family: var(--ff-cn);
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: var(--text-2);
+    margin-bottom: 16px;
+    border-radius: 0 6px 6px 0;
+  }
+  .report-card .insight strong { color: var(--text); font-weight: 500; }
+  .report-card .insight .quote-mark {
+    color: var(--gold);
+    font-family: var(--ff-display);
+    font-size: 24px;
+    line-height: 0;
+    margin-right: 4px;
+    vertical-align: -6px;
+  }
+  .report-card .verify-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .report-card .verify-tags .tag {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .report-card .verify-tags .tag::before {
+    content: '✓';
+    color: var(--jade);
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  /* ------ DELIVERY ------ */
+  .delivery-panel {
+    background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
+    border: 1px solid var(--line-2);
+    border-radius: 20px;
+    padding: 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .delivery-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, var(--line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.4;
+    pointer-events: none;
+    mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 70%);
+  }
+  .delivery-panel > * { position: relative; z-index: 1; }
+
+  .delivery-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+  }
+  .delivery-header h3 {
+    font-family: var(--ff-display);
+    font-size: 40px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  .delivery-header h3 .cn {
+    font-family: var(--ff-cn);
+    font-weight: 500;
+  }
+  .delivery-header .meta {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .delivery-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .delivery-item {
+    background: var(--bg-1);
+    padding: 22px 24px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+    transition: background 0.2s;
+  }
+  .delivery-item:hover {
+    background: var(--bg-2);
+  }
+  .delivery-item .num {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.1em;
+    min-width: 28px;
+  }
+  .delivery-item .name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .delivery-item .name .cn {
+    font-family: var(--ff-cn);
+    font-size: 15px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .delivery-item .name .sub {
+    font-family: var(--ff-mono);
+    font-size: 11px;
+    color: var(--text-3);
+  }
+  .delivery-item .status-pill {
+    font-family: var(--ff-mono);
+    font-size: 9px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .delivery-item .status-pill.ready {
+    background: rgba(79, 186, 106, 0.1);
+    color: var(--jade);
+    border: 1px solid rgba(79, 186, 106, 0.2);
+  }
+
+  /* ------ NEXT STEPS ------ */
+  .roadmap {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .rm-step {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+  }
+  .rm-step.active {
+    border-color: var(--teal);
+    background: linear-gradient(180deg, rgba(60, 200, 181, 0.05), var(--bg-1));
+  }
+  .rm-step .phase {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .rm-step.active .phase { color: var(--teal); }
+  .rm-step .phase-name {
+    font-family: var(--ff-cn);
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .rm-step .phase-time {
+    font-family: var(--ff-display);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--text-2);
+    margin-bottom: 16px;
+  }
+  .rm-step .phase-desc {
+    font-family: var(--ff-cn);
+    font-size: 13px;
+    color: var(--text-3);
+    line-height: 1.7;
+  }
+
+  /* ------ FOOTER ------ */
+  footer {
+    padding: 60px 40px;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    position: relative;
+    z-index: 2;
+  }
+  footer .sig {
+    font-family: var(--ff-display);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--text-2);
+    margin-bottom: 12px;
+  }
+  footer .meta {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* ------ DIVIDER ------ */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  .section-divider hr {
+    flex: 1;
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--line-2), transparent);
+  }
+  .section-divider .label {
+    font-family: var(--ff-mono);
+    font-size: 10px;
+    color: var(--text-3);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ------ RESPONSIVE ------ */
+  @media (max-width: 960px) {
+    nav { padding: 14px 20px; }
+    nav .status .version { display: none; }
+    .container { padding: 0 20px; }
+    .hero { padding: 60px 0 40px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    section { padding: 60px 0; }
+    .section-meta { grid-template-columns: 1fr; gap: 20px; margin-bottom: 40px; }
+    .timeline { margin-left: 0; padding-left: 28px; }
+    .tl-step::before { left: -34px; }
+    .tl-step .tl-changes { grid-template-columns: 1fr; }
+    .feedback-grid, .engines-grid, .modes-grid { grid-template-columns: 1fr; }
+    .reports-grid { grid-template-columns: 1fr; }
+    .report-card.span-2 { grid-column: auto; }
+    .delivery-list { grid-template-columns: 1fr; }
+    .delivery-panel { padding: 32px 20px; }
+    .roadmap { grid-template-columns: 1fr 1fr; }
+    .keystats { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* Reveal on scroll */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<nav>
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-text">
+      <div class="cn">ETF 营销雷达</div>
+      <div class="en">etf-growth · intelligence system</div>
+    </div>
+  </div>
+  <div class="status">
+    <span class="version">v2.1 · 已通过实战验证</span>
+    <span class="live">Driven Skill · ACTIVE</span>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">
+      <span>DRIVEN SKILL · 商业化销售 · ETF 方向</span>
+    </div>
+    <h1 class="hero-headline">
+      <span class="cn">ETF 营销雷达</span>
+    </h1>
+    <div class="hero-grid">
+      <div class="hero-pitch-wrap">
+        <p class="hero-pitch">
+          销售问一句<span class="quote">"最近哪些 ETF 该推"</span>，<br>
+          它给一份<span class="gold-emph">能直接发客户的简报</span>。
+        </p>
+        <p class="hero-lead">
+          基于雪球站内<span class="highlight">讨论、行为、KOL、话题</span>数据——
+          基金公司自家后台看不到的那些信号——自动生成
+          <strong>机会诊断 × 客户话术 × SKU 组合</strong>，
+          帮商业化销售比基金公司更早发现持营窗口。
+        </p>
+      </div>
+
+      <div class="keystats">
+        <div class="keystat">
+          <div class="label">Modes</div>
+          <div class="value">04<span class="unit">/ 全部验证</span></div>
+          <div class="sub">单品 · 全司 · 竞品 · 赛道推荐</div>
+        </div>
+        <div class="keystat">
+          <div class="label">Bug Fixed</div>
+          <div class="value">10<span class="unit">/ v2.1</span></div>
+          <div class="sub">API + 数据 + 逻辑层系统修复</div>
+        </div>
+        <div class="keystat">
+          <div class="label">Sector Dict</div>
+          <div class="value">79<span class="unit">/ 二级赛道</span></div>
+          <div class="sub">Wind 权威标签 + 关键词 + 成分股三元组</div>
+        </div>
+        <div class="keystat">
+          <div class="label">Live Tests</div>
+          <div class="value">05<span class="unit">/ 报告</span></div>
+          <div class="sub">华夏 / 易方达 / A500 等实战样本</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><hr><span class="label">01 · Version Timeline</span><hr></div>
+
+<!-- ============ TIMELINE ============ -->
+<section class="reveal">
+  <div class="container">
+    <div class="section-meta">
+      <div class="section-idx">01 / 05</div>
+      <div class="section-head">
+        <h2><span class="cn">版本演进</span> <span class="italic">Timeline</span></h2>
+        <p class="desc">
+          三个版本、两轮迭代。每一次升级都有明确的<strong>驱动因素</strong>——要么是一线销售 Leader 的真实反馈，要么是首轮实战测试暴露的硬问题。
+          技术修复永远紧跟业务需求，不做"自嗨式优化"。
+        </p>
+      </div>
+    </div>
+
+    <div class="timeline">
+
+      <!-- VP 初版 -->
+      <div class="tl-step">
+        <div class="tl-ver">
+          <span class="v">v1.0</span>
+          <span class="date">· VP 初版</span>
+        </div>
+        <div class="tl-name">三引擎 × 三模式 · 概念原型</div>
+        <div class="tl-changes">
+          <div class="tl-change">
+            <div class="tag">框架</div>
+            <p>建立 <strong>三引擎评分体系</strong>（行情 × 生态 × 竞品）与 <strong>单品 / 全司 / 竞品</strong> 三种使用模式</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag">定位</div>
+            <p>明确"比基金公司更早发现"的差异化价值——<strong>雪球独有的社区讨论数据</strong>是基金公司后台看不到的上游信号</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- v2.0 -->
+      <div class="tl-step gold">
+        <div class="tl-ver">
+          <span class="v">v2.0</span>
+          <span class="date">· 2026-04-22</span>
+        </div>
+        <div class="tl-name">结构性重构 · 销售真正能用的版本</div>
+        <div class="tl-driver">
+          <span class="dlabel">Driver</span>
+          多位销售 Leader 访谈：<em>"客户提出来的都适合营销""客户问最近哪些赛道热""不同客户决策逻辑差很多"</em>
+        </div>
+        <div class="tl-changes">
+          <div class="tl-change">
+            <div class="tag new">新增</div>
+            <p><strong>模式四 · 赛道推荐</strong>——回答"今天哪些赛道最热"的反向查询场景</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag improve">升级</div>
+            <p>引擎 B 由单维讨论扩展为 <strong>讨论 + 行为 + KOL 三模块</strong>，引入 follow7d 最前置行为信号</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag new">新增</div>
+            <p><strong>客户类型三分层</strong> × 三态势 = <strong>9 套话术变体</strong>（投研驱动 / 渠道驱动 / 新进小厂）</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag new">新增</div>
+            <p><strong>SKU 推荐引擎</strong>对接《2026 雪球 ETF 产品服务手册》六大类 SKU + 13 个真实合作案例库</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag improve">调整</div>
+            <p>取消"立即行动/暂不推"强判定——<strong>只给共振状态，决策权交还客户</strong></p>
+          </div>
+          <div class="tl-change">
+            <div class="tag">基础</div>
+            <p>术语全量改"商业化销售"/ Wind 官方主题标签锚点库（81 只）/ 赛道词典首版（79 二级赛道）</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- v2.1 -->
+      <div class="tl-step current">
+        <div class="tl-ver">
+          <span class="v">v2.1</span>
+          <span class="date">· 2026-04-22 晚</span>
+        </div>
+        <div class="tl-name">实战稳定化 · 当前上线版本</div>
+        <div class="tl-driver">
+          <span class="dlabel">Driver</span>
+          v2.0 首轮跑三份报告暴露 <em>7 个 API 硬错误 + 模式四过度复杂 + 词典关键词不精确</em>
+        </div>
+        <div class="tl-changes">
+          <div class="tl-change">
+            <div class="tag critical">关键修复</div>
+            <p><strong>7 个 API 硬错误</strong>全部修复：费率走 webSearch 兜底、follow7d 必传参数、search 参数名、status 翻页 3 页等</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag improve">简化</div>
+            <p><strong>模式四砍掉过度复杂打分公式</strong>，改为 Driven 实战验证的扁平日报结构（市场背景 + 热赛道 + 热点催化 + 白地 + 冷门 + 客户清单 + 主线）</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag new">新增</div>
+            <p><strong>护城河型 ETF 识别规则</strong>——规模 >500 亿 + 同指数占比 >80% → 走品牌守护话术，不走持营冲量</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag fix">规则</div>
+            <p><strong>热点催化来源强制规则</strong>：必须来自 hot_event/tag 真实标签，禁止 AI 自造事件性描述</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag fix">规则</div>
+            <p><strong>Step 3 强制读赛道词典</strong>：禁止 Skill 自行推断关键词，避免"上证50"被误推为"蓝筹/大盘 ETF"导致搜索 0 结果</p>
+          </div>
+          <div class="tl-change">
+            <div class="tag improve">性能</div>
+            <p>L4 成分股改 batch 调用，单品三引擎耗时 <strong>从 90-120 秒预估降到 30-50 秒</strong></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><hr><span class="label">02 · Feedback-Driven Design</span><hr></div>
+
+<!-- ============ LEADER FEEDBACK ============ -->
+<section class="reveal">
+  <div class="container">
+    <div class="section-meta">
+      <div class="section-idx">02 / 05</div>
+      <div class="section-head">
+        <h2><span class="cn">销售 Leader 反馈</span> <span class="italic">Driven Design</span></h2>
+        <p class="desc">
+          本项目每一个关键设计决策都能追溯到<strong>一线销售 Leader 的真实反馈</strong>。以下三条反馈是 v2.0 核心升级的源头——
+          工具要服务于销售的真实工作方式，不是反过来让销售适应工具。
+        </p>
+      </div>
+    </div>
+
+    <div class="feedback-grid">
+      <div class="feedback-card">
+        <div class="src">Feedback · 01</div>
+        <blockquote>
+          "客户不会问某只 ETF 适不适合营销，客户提出来的都适合。客户会问——最近你们哪些赛道比较热？"
+        </blockquote>
+        <div class="arrow">→ DESIGN RESPONSE</div>
+        <div class="action">
+          <strong>新增模式四 · 赛道推荐</strong>，支持"今天哪些赛道最热"的反向查询。基于 follow7d 行为数据反向映射赛道 + 基金公司清单。
+        </div>
+      </div>
+
+      <div class="feedback-card">
+        <div class="src">Feedback · 02</div>
+        <blockquote>
+          "中间最有价值的就是雪球的数据分析部分。"
+        </blockquote>
+        <div class="arrow">→ DESIGN RESPONSE</div>
+        <div class="action">
+          <strong>引擎 B 升级为三模块</strong>（讨论 50% + 行为 40% + KOL 10%），新增 follow7d / hot_stock 等<strong>基金公司后台看不到的独有信号</strong>。
+        </div>
+      </div>
+
+      <div class="feedback-card">
+        <div class="src">Feedback · 03</div>
+        <blockquote>
+          "国泰富国这种是投研决策，会直接给想投的产品，我们给意见怎么投。其他客户会参考我们的赛道建议。"
+        </blockquote>
+        <div class="arrow">→ DESIGN RESPONSE</div>
+        <div class="action">
+          <strong>客户三分层</strong>（投研驱动 / 渠道驱动 / 新进小厂），态势 × 客户 = <strong>9 套话术变体</strong>，同一份数据不同对接人用不同话术。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><hr><span class="label">03 · Four Operating Modes</span><hr></div>
+
+<!-- ============ MODES ============ -->
+<section class="reveal">
+  <div class="container">
+    <div class="section-meta">
+      <div class="section-idx">03 / 05</div>
+      <div class="section-head">
+        <h2><span class="cn">四种使用模式</span> <span class="italic">— Usage Modes</span></h2>
+        <p class="desc">
+          模式覆盖销售 <strong>四类高频场景</strong>——跟单只 ETF 客户会、扫一遍基金公司全产品线、判断赛道竞争格局、做日报看今日热度。
+          每种模式自动识别、自动路由，销售用自然语言就能触发。
+        </p>
+      </div>
+    </div>
+
+    <div class="modes-grid">
+
+      <div class="mode-card">
+        <div class="mode-num">— Mode I</div>
+        <h3>单品诊断</h3>
+        <div class="mode-en">Single ETF Analysis</div>
+        <p class="mode-desc">一只 ETF 的完整营销诊断，三引擎全分析 + 客户话术 + SKU 组合，一份能直接带去客户会的机会简报。</p>
+        <div class="triggers">
+          <span class="t">"159995 适合持营吗"</span>
+          <span class="t">"给我华夏芯片 ETF 的客户弹药"</span>
+        </div>
+        <div class="outputs">
+          <div class="h">CORE OUTPUT</div>
+          <ul>
+            <li>三引擎得分 + 共振判定 + 竞争态势</li>
+            <li>客户类型适配话术（护城河型独立分支）</li>
+            <li>3 个核心 SKU 推荐 + 真实案例背书</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mode-card">
+        <div class="mode-num">— Mode II</div>
+        <h3>全司地图</h3>
+        <div class="mode-en">Fund House Portfolio Scan</div>
+        <p class="mode-desc">某家基金公司旗下全部 ETF 扫描，自动按赛道聚类 + 分层排优先级 + 跨产品协同建议。</p>
+        <div class="triggers">
+          <span class="t">"华夏基金旗下 ETF 扫一遍"</span>
+          <span class="t">"易方达哪些 ETF 值得重点推"</span>
+        </div>
+        <div class="outputs">
+          <div class="h">CORE OUTPUT</div>
+          <ul>
+            <li>ETF 优先级矩阵 · 四档分层</li>
+            <li>护城河型产品独立标注</li>
+            <li>共享 KOL 池 + 联合话题机会</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mode-card">
+        <div class="mode-num">— Mode III</div>
+        <h3>竞品格局</h3>
+        <div class="mode-en">Peer Competitive Landscape</div>
+        <p class="mode-desc">同一指数赛道的横向竞争格局 + 白地分析——识别"社区已讨论、竞品未跟上"的窗口。</p>
+        <div class="triggers">
+          <span class="t">"中证 A500 ETF 赛道比一比"</span>
+          <span class="t">"AI 算力 ETF 谁在领跑"</span>
+        </div>
+        <div class="outputs">
+          <div class="h">CORE OUTPUT</div>
+          <ul>
+            <li>竞争格局矩阵（全家横向对比）</li>
+            <li>白地 ETF 清单 + 饥渴度指数</li>
+            <li>领先者 / 红海 / 落后者分别话术</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mode-card">
+        <div class="tag-new">v2.0 核心新增</div>
+        <div class="mode-num">— Mode IV</div>
+        <h3>赛道推荐</h3>
+        <div class="mode-en">Sector Momentum · Reverse Query</div>
+        <p class="mode-desc">销售最高频的"今天哪些赛道热"的反向查询——基于站内行为数据反向映射赛道和对应基金公司客户。</p>
+        <div class="triggers">
+          <span class="t">"今天站内哪些 ETF 赛道最热"</span>
+          <span class="t">"给我今日 ETF 营销日报"</span>
+        </div>
+        <div class="outputs">
+          <div class="h">CORE OUTPUT</div>
+          <ul>
+            <li>市场背景 + TOP 5 热赛道 + 热点催化</li>
+            <li>白地赛道清单 · 冷门赛道清单</li>
+            <li>今日建议优先触达客户（反查映射）</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><hr><span class="label">04 · Scoring Framework</span><hr></div>
+
+<!-- ============ ENGINES ============ -->
+<section class="reveal">
+  <div class="container">
+    <div class="section-meta">
+      <div class="section-idx">04 / 05</div>
+      <div class="section-head">
+        <h2><span class="cn">三引擎评分体系</span> <span class="italic">Engines</span></h2>
+        <p class="desc">
+          <strong>综合分 = 0.35×A + 0.40×B + 0.25×C</strong>。引擎 B 权重最高，因为这是雪球独有价值——
+          基金公司在自家后台看不到的上游生态数据，正是我们的差异化弹药。
+        </p>
+      </div>
+    </div>
+
+    <div class="engines-grid">
+
+      <div class="engine-card a">
+        <div class="eng-label"><span>ENGINE A</span><span class="weight">35%</span></div>
+        <h3>客观行情</h3>
+        <div class="en">Market Signals</div>
+        <p>时效性信号，基金公司自己也有。但我们 <strong>扫全市场更快</strong>——同样的涨跌幅 / 成交额 / 换手率 / 溢折价 / 振幅 / 相对强度，我们跑 60 日 K 线全市场横向扫描。</p>
+        <div class="sub-modules">
+          <div class="m"><span class="w">—</span><span class="n">涨跌幅（日 / 5日 / 20日）</span></div>
+          <div class="m"><span class="w">—</span><span class="n">成交额放大倍数 · 换手率</span></div>
+          <div class="m"><span class="w">—</span><span class="n">溢折价 · 振幅 · 相对强度</span></div>
+        </div>
+      </div>
+
+      <div class="engine-card b b-engine">
+        <div class="badge-new">v2.1 升级</div>
+        <div class="eng-label"><span>ENGINE B</span><span class="weight">40%</span></div>
+        <h3>生态势能</h3>
+        <div class="en">Ecosystem Energy</div>
+        <p><strong>雪球独有的差异化弹药</strong>。v2.0 新增行为势能模块，让 <strong>follow7d</strong>（7 日新增关注）这种聪明资金注意力信号成为最前置的持营判断依据。</p>
+        <div class="sub-modules">
+          <div class="m"><span class="w">50%</span><span class="n">B1 · 讨论势能（L1/L2/L3/L4 四层聚合）</span></div>
+          <div class="m"><span class="w">40%</span><span class="n">B2 · 行为势能（follow7d + hot_stock）</span></div>
+          <div class="m"><span class="w">10%</span><span class="n">B3 · KOL 卷入度（跨层扩散）</span></div>
+        </div>
+      </div>
+
+      <div class="engine-card c">
+        <div class="eng-label"><span>ENGINE C</span><span class="weight">25%</span></div>
+        <h3>竞品对标</h3>
+        <div class="en">Competitive Landscape</div>
+        <p>同指数 ETF 横向比较——触发基金公司"看对手动作做决策"的心理，也是<strong>白地识别</strong>和态势分类（领先者 / 红海 / 落后者）的基础。</p>
+        <div class="sub-modules">
+          <div class="m"><span class="w">40分</span><span class="n">规模对标（同指数排名 + 领先倍数）</span></div>
+          <div class="m"><span class="w">30分</span><span class="n">费率对比（管理费 + 托管费）</span></div>
+          <div class="m"><span class="w">30分</span><span class="n">近期表现超额（相对中位数）</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><hr><span class="label">05 · Live Battle-Testing</span><hr></div>
+
+<!-- ============ EVIDENCE ============ -->
+<section class="reveal">
+  <div class="container">
+    <div class="section-meta">
+      <div class="section-idx">05 / 05</div>
+      <div class="section-head">
+        <h2><span class="cn">实战验证</span> <span class="italic">Battle-Tested</span></h2>
+        <p class="desc">
+          v2.1 已通过 <strong>5 份真实报告</strong>的完整验证。不是 PPT 承诺——以下是真实跑出来的关键结论摘录，涵盖四个模式的全部核心场景。
+        </p>
+      </div>
+    </div>
+
+    <div class="evidence-intro">
+      <div class="label">Verification Summary</div>
+      <p>
+        测试场景覆盖：<strong>护城河型 ETF（华夏上证 50）</strong>、<strong>红海竞争（华夏芯片 ETF）</strong>、<strong>全市场赛道扫描（今日日报）</strong>、<strong>大厂全司诊断（华夏 30 只）</strong>、<strong>红海赛道格局（中证 A500 20 家竞争）</strong>。
+        所有核心机制——护城河识别、场景分支、白地识别、跨引擎洞察、客户反查——均在实战中验证通过。
+      </p>
+    </div>
+
+    <div class="reports-grid">
+
+      <!-- Report 1: 510050 护城河型 -->
+      <div class="report-card">
+        <div class="report-head">
+          <div class="left">
+            <div class="cat">Mode I · 单品诊断 · 护城河型</div>
+            <h4>华夏上证 50 ETF <span class="code">SH510050</span></h4>
+          </div>
+          <div class="right">
+            <div class="verdict gold">39 / 100</div>
+            <div class="state">⚪ 冷却期 · 🏰 护城河型</div>
+          </div>
+        </div>
+        <div class="report-body">
+          <div class="scores">
+            <div class="score a"><div class="eng">A · 行情</div><div class="val">11<span class="total">/100</span></div></div>
+            <div class="score b"><div class="eng">B · 生态</div><div class="val">41<span class="total">/100</span></div></div>
+            <div class="score c"><div class="eng">C · 竞品</div><div class="val">75<span class="total">/100</span></div></div>
+          </div>
+          <div class="insight">
+            <span class="quote-mark">"</span>
+            规模 660 亿 + 同指数市占 98.5% → <strong>护城河认证触发</strong>。走品牌守护分支，不走持营冲量。
+            SKU 推荐 <strong>方略对话 + 雪球参考 + 嘉年华</strong>，不推信息流/板块预言家。
+          </div>
+          <div class="verify-tags">
+            <span class="tag">护城河规则生效</span>
+            <span class="tag">话术分支正确切换</span>
+            <span class="tag">SKU 组合符合预期</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report 2: 159995 红海 -->
+      <div class="report-card">
+        <div class="report-head">
+          <div class="left">
+            <div class="cat">Mode I · 单品诊断 · 红海竞争</div>
+            <h4>华夏芯片 ETF <span class="code">SZ159995</span></h4>
+          </div>
+          <div class="right">
+            <div class="verdict crimson">30 / 100</div>
+            <div class="state">⚪ 冷却期 · ⚔️ 红海竞争</div>
+          </div>
+        </div>
+        <div class="report-body">
+          <div class="scores">
+            <div class="score a"><div class="eng">A · 行情</div><div class="val">28<span class="total">/100</span></div></div>
+            <div class="score b"><div class="eng">B · 生态</div><div class="val">20<span class="total">/100</span></div></div>
+            <div class="score c"><div class="eng">C · 竞品</div><div class="val">50<span class="total">/100</span></div></div>
+          </div>
+          <div class="insight">
+            <span class="quote-mark">"</span>
+            20 日涨 9.41% 但今日热股榜 TOP10 全是 <strong>中际旭创、天孚通信</strong> 等光通信股——芯片赛道一只未入榜。
+            <strong>"价格已起、叙事被抢"</strong> 的典型内容介入窗口。推荐话题位 + 垂直 KOL 合作（站内已识别 @半点芯事为唯一投研向芯片大 V）。
+          </div>
+          <div class="verify-tags">
+            <span class="tag">跨引擎融合洞察</span>
+            <span class="tag">KOL 质量化筛选</span>
+            <span class="tag">非护城河场景正确</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report 3: 赛道日报 -->
+      <div class="report-card span-2">
+        <div class="report-head">
+          <div class="left">
+            <div class="cat">Mode IV · 赛道推荐日报</div>
+            <h4>今日 ETF 赛道销售日报 <span class="code">2026-04-23</span></h4>
+          </div>
+          <div class="right">
+            <div class="verdict teal">🥇 AI 光通信</div>
+            <div class="state">双引擎共振 · 黄金白地期识别</div>
+          </div>
+        </div>
+        <div class="report-body">
+          <div class="insight">
+            <span class="quote-mark">"</span>
+            <strong>三个核心发现</strong>——
+            ① AI 光通信 / CPO：今日唯一双引擎共振（热股榜霸榜 8 只 + 同日触发 2 大热门话题 #光纤概念大涨# + #CPO 再走强#）→ 对应客户 国泰基金 / 华夏基金
+            ② 黄金 / 贵金属：<strong>隐藏白地赛道</strong>，7 日讨论环比 +164% 但 ETF 近 20 日涨幅仅 +2.68%，华安基金许之彦（37 万粉）已主动在站内发声 → 华安 / 易方达客户最佳介入点
+            ③ AI 算力：最大行情 / 讨论背离（20 日 +17% vs 7 日仅 9 条讨论）——<strong>AI 光通信叙事在虹吸注意力</strong>
+          </div>
+          <div class="verify-tags">
+            <span class="tag">白地赛道独立识别</span>
+            <span class="tag">热点催化源自真实 hot_event</span>
+            <span class="tag">客户反查清单完备</span>
+            <span class="tag">跨赛道注意力洞察</span>
+            <span class="tag">基金公司自家 KOL 信号</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report 4: 华夏全司 -->
+      <div class="report-card">
+        <div class="report-head">
+          <div class="left">
+            <div class="cat">Mode II · 全司诊断</div>
+            <h4>华夏基金 30 只 ETF <span class="code">~5,530 亿</span></h4>
+          </div>
+          <div class="right">
+            <div class="verdict gold">🏰 ×4</div>
+            <div class="state">4 只护城河 · 4 只重点机会</div>
+          </div>
+        </div>
+        <div class="report-body">
+          <div class="insight">
+            <span class="quote-mark">"</span>
+            <strong>核心发现</strong>：通信 ETF（+27%）与电网设备 ETF（348 亿）是<strong>双引擎温热最佳窗口</strong>；
+            恒生互联网 ETF（339 亿 + 讨论 29 条 + 行情 -5%）<strong>典型白地期</strong>，港股反转即爆发；
+            4 只护城河型产品（沪深 300 / 科创 50 / 上证 50 / 恒生科技）走品牌守护路径，不做攻击型话术。
+          </div>
+          <div class="verify-tags">
+            <span class="tag">扫全 30 只 ETF</span>
+            <span class="tag">护城河识别扩展</span>
+            <span class="tag">跨产品协同建议</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report 5: A500 竞品 -->
+      <div class="report-card">
+        <div class="report-head">
+          <div class="left">
+            <div class="cat">Mode III · 竞品格局</div>
+            <h4>中证 A500 ETF 赛道 <span class="code">20 家竞争</span></h4>
+          </div>
+          <div class="right">
+            <div class="verdict teal">~2,068 亿</div>
+            <div class="state">红海竞争 · 费率均一化</div>
+          </div>
+        </div>
+        <div class="report-body">
+          <div class="insight">
+            <span class="quote-mark">"</span>
+            <strong>赛道级核心洞察</strong>：A 分高度趋同（20 日涨幅差仅 0.38%）、费率完全均一（0.20%）→
+            <strong>B 分运营是唯一胜负手</strong>。华泰柏瑞 7 日讨论 8 条为全赛道 4-8 倍，规模第一同时内容运营最强，建议升级为持续内容 IP。
+            华夏成交量比 0.72 全赛道最低，是活动 SKU 的优质介入点。
+          </div>
+          <div class="verify-tags">
+            <span class="tag">20 家全覆盖</span>
+            <span class="tag">赛道本质洞察</span>
+            <span class="tag">分档 SKU 推荐</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"><hr><span class="label">06 · Delivery Checklist</span><hr></div>
+
+<!-- ============ DELIVERY ============ -->
+<section class="reveal">
+  <div class="container">
+
+    <div class="delivery-panel">
+      <div class="delivery-header">
+        <h3><span class="cn">完整交付清单</span></h3>
+        <div class="meta">v2.1 · 10 项全部就绪</div>
+      </div>
+
+      <div class="delivery-list">
+        <div class="delivery-item">
+          <div class="num">01</div>
+          <div class="name">
+            <div class="cn">Skill 核心文档</div>
+            <div class="sub">etf-growth-skill-v2.1.md · 2,278 行 · 113 KB</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">02</div>
+          <div class="name">
+            <div class="cn">项目介绍页</div>
+            <div class="sub">index.html · GitHub Pages 部署</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">03</div>
+          <div class="name">
+            <div class="cn">赛道词典 · 附录 B</div>
+            <div class="sub">10 大类 · 79 二级赛道 · 关键词+代表ETF+成分股</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">04</div>
+          <div class="name">
+            <div class="cn">Wind 权威标签库 · 附录 A</div>
+            <div class="sub">81 只 ETF · Wind 概念主题基金标签</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">05</div>
+          <div class="name">
+            <div class="cn">真实案例库 · 附录 D</div>
+            <div class="sub">13 个雪球 × 基金公司合作案例（PDF 手册溯源）</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">06</div>
+          <div class="name">
+            <div class="cn">API 接入清单</div>
+            <div class="sub">11 个雪球 xq 端点 · Driven 实测验证</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">07</div>
+          <div class="name">
+            <div class="cn">客户分层规则 · 附录 C</div>
+            <div class="sub">投研 / 渠道 / 新进小厂三分层 + 识别逻辑</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">08</div>
+          <div class="name">
+            <div class="cn">SKU 推荐矩阵</div>
+            <div class="sub">6 大类 SKU × 9 套话术 × 态势匹配规则</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">09</div>
+          <div class="name">
+            <div class="cn">实战验证报告</div>
+            <div class="sub">5 份真实报告 · 四模式全覆盖</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+        <div class="delivery-item">
+          <div class="num">10</div>
+          <div class="name">
+            <div class="cn">销售使用指引</div>
+            <div class="sub">自然语言触发 · 无需记指令 · 自动识别模式</div>
+          </div>
+          <div class="status-pill ready">已交付</div>
+        </div>
+      </div>
+
+      <!-- Roadmap -->
+      <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--line);">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+          <div style="font-family: var(--ff-display); font-size: 28px; font-weight: 400;">
+            <span class="cn" style="font-family: var(--ff-cn); font-weight: 500;">下一阶段路径</span> <span style="font-style: italic; color: var(--text-2);">Roadmap</span>
+          </div>
+          <div style="font-family: var(--ff-mono); font-size: 10px; color: var(--text-3); letter-spacing: 0.15em; text-transform: uppercase;">Pilot → Feedback → Iteration → Rollout</div>
+        </div>
+
+        <div class="roadmap">
+          <div class="rm-step active">
+            <div class="phase">Phase 01 · NOW</div>
+            <div class="phase-name">当前版本</div>
+            <div class="phase-time">本周</div>
+            <div class="phase-desc">v2.1 已完成实战验证，随时可进入销售试用阶段</div>
+          </div>
+          <div class="rm-step">
+            <div class="phase">Phase 02 · NEXT</div>
+            <div class="phase-name">小范围试用</div>
+            <div class="phase-time">1-2 周</div>
+            <div class="phase-desc">1-2 位信任的销售真实客户场景使用，沉淀痛点反馈</div>
+          </div>
+          <div class="rm-step">
+            <div class="phase">Phase 03</div>
+            <div class="phase-name">v2.1.1 迭代</div>
+            <div class="phase-time">基于反馈</div>
+            <div class="phase-desc">针对真实销售痛点修复与优化，非拍脑袋优化</div>
+          </div>
+          <div class="rm-step">
+            <div class="phase">Phase 04</div>
+            <div class="phase-name">全员推广</div>
+            <div class="phase-time">稳定后</div>
+            <div class="phase-desc">v2.1.1 稳定 → 推给 ETF 业务全线销售</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="sig">Built for Xueqiu Commercial Sales · Finance Line · ETF Vertical</div>
+  <div class="meta">etf-growth v2.1 · 2026-04-23 · 仅供内部参考</div>
+</footer>
+
+</main>
+
+<script>
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('in');
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
